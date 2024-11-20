@@ -10,8 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
     "ethers": "^5.7.2",
+    "express": "^4.21.1",
     "nuxt": "^3.14.0",
+    "puppeteer": "^23.8.0",
     "vue": "^3.3.0",
     "vue-router": "^4.2.0",
     "web3": "^4.15.0"
