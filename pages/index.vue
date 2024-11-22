@@ -19,7 +19,11 @@
           </div>
         </div>
         <div class="voting-card-footer">
-          <span class="voting-time-left">{{ activeVote.timeLeft }} 남음</span>
+          <div class="time-left-container">
+            <span class="time-icon">⏳</span>
+            <span class="voting-time-left">{{ formattedTimeLeft }}</span>
+            <span class="time-remaining">남음</span>
+          </div>
         </div>
       </div>
     </div>
@@ -51,18 +55,47 @@
 </template>
 
 <script setup>
+const targetDate = new Date('2024-11-30 12:00:00').getTime();
+const timeLeft = ref('')
+const formattedTimeLeft = ref('')
+let timer
+
+const updateTimer = () => {
+  const now = new Date().getTime()
+  const difference = targetDate - now
+
+  if (difference > 0) {
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000)
+
+    timeLeft.value = `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
+    formattedTimeLeft.value = `D-${days} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  } else {
+    timeLeft.value = 'D-day가 지났습니다!'
+    formattedTimeLeft.value = 'D-day가 지났습니다!'
+    clearInterval(timer)
+  }
+}
+
+onMounted(() => {
+  updateTimer()
+  timer = setInterval(updateTimer, 1000)
+})
+
 const activeVote = {
   icon: 'https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp',
   title: '가장많이 오를것같은 코인은?',
   options: [
-    { name: '비트코인', percentage: 45 },
-    { name: '이더리움', percentage: 35 },
-    { name: '솔라나', percentage: 20 },
-    { name: '폴리곤', percentage: 20 },
-    { name: '리플', percentage: 20 },
-    { name: '도지코인', percentage: 20 },
-    { name: '시바이누', percentage: 20 },
-    { name: '아크', percentage: 20 },
+    { name: '도지코인', percentage: 25 },
+    { name: '비트코인', percentage: 23 },
+    { name: '이더리움', percentage: 12 },
+    { name: '솔라나', percentage: 11 },
+    { name: '폴리곤', percentage: 10 },
+    { name: '리플', percentage: 9 },
+    { name: '시바이누', percentage: 6 },
+    { name: '아크', percentage: 4 },
   ],
   timeLeft: '3일'
 };
@@ -136,56 +169,61 @@ const items = [
     volume: '$1.2m',
     comments: 120
   },{
-    icon: '/path/to/icon1.png',
-    title: 'Market Title 1',
+    icon: 'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fjerome%2Bpowell%2Bglasses1.png&w=96&q=75',
+    title: 'Fed decision in December?',
     options: [
-      { name: 'Option 1', percentage: 60 },
-      { name: 'Option 2', percentage: 40 },
+      { name: '75+ bps decrease', percentage: 20 },
+      { name: '25+ bps decrease', percentage: 10 },
+      { name: 'Other', percentage: 10 },
+      { name: '50 bps decrease', percentage: 10 },
+      { name: '25 bps decrease', percentage: 20 },
     ],
     volume: '$1.2m',
     comments: 120
   },
   {
-    icon: '/path/to/icon1.png',
-    title: 'Market Title 1',
+    icon: 'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fradioactive.png&w=96&q=100',
+    title: 'Will a nuclear weapon detonate in 2024?',
     options: [
-      { name: 'Option 1', percentage: 60 },
-      { name: 'Option 2', percentage: 40 },
+      { name: 'yes', percentage: 50 },
+      { name: 'no', percentage: 50 },
     ],
     volume: '$1.2m',
     comments: 120
   },
   {
-    icon: '/path/to/icon1.png',
-    title: 'Market Title 1',
+    icon: 'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fisrael-x-hezbollah-ceasefire-in-2024-SleLk5Jat7iT.jpg&w=96&q=100',
+    title: 'Israel x Hezbollah Ceasefire in 2024?',
     options: [
-      { name: 'Option 1', percentage: 60 },
-      { name: 'Option 2', percentage: 40 },
+      { name: 'yes', percentage: 60 },
+      { name: 'no', percentage: 40 },
     ],
     volume: '$1.2m',
     comments: 120
   },
   {
-    icon: '/path/to/icon1.png',
-    title: 'Market Title 1',
+    icon: 'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fbtc%2Bparty.png&w=96&q=100',
+    title: 'Will Bitcoin hit $100k in 2024?',
     options: [
-      { name: 'Option 1', percentage: 60 },
-      { name: 'Option 2', percentage: 40 },
+      { name: 'yes', percentage: 60 },
+      { name: 'no', percentage: 40 },
     ],
     volume: '$1.2m',
     comments: 120
   },
   {
-    icon: '/path/to/icon1.png',
-    title: 'Market Title 1',
+    icon: 'https://polymarket.com/_next/image?url=https%3A%2F%2Fpolymarket-upload.s3.us-east-2.amazonaws.com%2Fsuperbowl-champion-2025-0QHIP2qbyyH0.png&w=96&q=100',
+    title: 'Super Bowl Champion 2025',
     options: [
-      { name: 'Option 1', percentage: 60 },
-      { name: 'Option 2', percentage: 40 },
+      { name: 'Lions', percentage: 24 },
+      { name: 'Chiefs', percentage: 19 },
+      { name: 'Eagles', percentage: 19 },
+      { name: 'Ravens', percentage: 19 },
+      { name: '49ers', percentage: 19 },
     ],
     volume: '$1.2m',
     comments: 120
   },
-  // ... 7개 더 추가
 ];
 </script>
 
@@ -414,7 +452,7 @@ const items = [
   font-size: 12px;
   margin-left: 10px;
 }
-
+/**
 .voting-card-footer {
   padding: 12px;
   background-color: rgba(0, 0, 0, 0.1);
@@ -424,7 +462,41 @@ const items = [
   font-size: 14px;
   color: var(--colors-shadeMedium, #808080);
 }
+**/
+.voting-card-footer {
+  padding: 12px 16px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.time-left-container {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 6px 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.voting-time-left {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333333;
+}
+
+.time-remaining {
+  font-size: 14px;
+  color: #666666;
+  margin-left: 4px;
+}
 /* 기존 grid 및 card 스타일 유지 */
 .grid {
   display: grid;
