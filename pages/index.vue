@@ -15,7 +15,7 @@
               <div class="voting-progress" :style="{ width: option.percentage + '%' }"></div>
             </div>
             <span class="voting-option-percentage">{{ option.percentage }}%</span>
-            <button class="btn btn-vote">투표하기</button>
+            <button class="btn btn-vote" @click="getAllVotes">투표하기</button>
           </div>
         </div>
         <div class="voting-card-footer">
@@ -55,10 +55,335 @@
 </template>
 
 <script setup>
+import Web3 from 'web3';
+
+const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
+const contractABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "recipients",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "batchTransfer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "voteId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "optionIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "castVote",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "question",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "imageURL",
+        "type": "string"
+      },
+      {
+        "internalType": "string[]",
+        "name": "options",
+        "type": "string[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "duration",
+        "type": "uint256"
+      }
+    ],
+    "name": "createVote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "recipients",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "EtherTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "voteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "question",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "imageURL",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string[]",
+        "name": "options",
+        "type": "string[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "startTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "endTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "VoteCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "voteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "winningOption",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalBetAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "winners",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "VoteEnded",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "getAllVotes",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "voteIds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "string[]",
+        "name": "questions",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "voteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getVoteResults",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "winningOption",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalBetAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "winners",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "voteCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "votes",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "question",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "imageURL",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "startTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "endTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalBetAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "ended",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+const contractAddress = '0x743CA5A10f45A14150A1cd6f1F1624499e2C4124';
+
+// 스마트 계약 인스턴스 생성
+const votingContract = new web3.eth.Contract(contractABI, contractAddress);
+
+// 투표 생성 함수
+async function createVote(question, imageURL, options, duration) {
+  const accounts = await web3.eth.getAccounts();
+  await votingContract.methods.createVote(question, imageURL, options, duration).send({ from: accounts[0] });
+}
+
+// 투표 참여 함수
+async function castVote(voteId, optionIndex) {
+  const accounts = await web3.eth.getAccounts();
+  await votingContract.methods.castVote(voteId, optionIndex).send({ from: accounts[0], value: web3.utils.toWei('0.1', 'ether') });
+}
+
+// 투표 결과 조회 함수
+async function getVoteResults(voteId) {
+  const result = await votingContract.methods.getVoteResults(voteId).call();
+  console.log(result);
+}
+
+// 모든 투표 조회 함수
+async function getAllVotes() {
+  try {
+    const result = await votingContract.methods.getAllVotes().call();
+    console.log(result);
+  } catch (error) {
+    console.error('Error fetching votes:', error);
+  }
+}
+
+// 이벤트 리스닝
+votingContract.events.VoteCreated({}, (error, event) => {
+  console.log('New vote created:', event.returnValues);
+});
+
+votingContract.events.VoteEnded({}, (error, event) => {
+  console.log('Vote ended:', event.returnValues);
+});
+
 const targetDate = new Date('2024-11-30 12:00:00').getTime();
 const timeLeft = ref('')
 const formattedTimeLeft = ref('')
 let timer
+
 
 const updateTimer = () => {
   const now = new Date().getTime()
@@ -79,9 +404,10 @@ const updateTimer = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   updateTimer()
   timer = setInterval(updateTimer, 1000)
+  await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ['도지코인', '비트코인', '이더리움', '솔라나', '폴리곤', '리플', '시바이누', '아크'], 259200);
 })
 
 const activeVote = {
@@ -225,6 +551,8 @@ const items = [
     comments: 120
   },
 ];
+
+
 </script>
 
 <style scoped>
