@@ -337,7 +337,7 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x743CA5A10f45A14150A1cd6f1F1624499e2C4124';
+const contractAddress = '0x62e47a9583897C91300a42C81E1D46eA0686295d';
 
 // 스마트 계약 인스턴스 생성
 const votingContract = new web3.eth.Contract(contractABI, contractAddress);
@@ -407,7 +407,7 @@ const updateTimer = () => {
 onMounted(async () => {
   updateTimer()
   timer = setInterval(updateTimer, 1000)
-  await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ['도지코인', '비트코인', '이더리움', '솔라나', '폴리곤', '리플', '시바이누', '아크'], 259200);
+  await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
 })
 
 const activeVote = {
