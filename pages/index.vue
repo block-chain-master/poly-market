@@ -337,15 +337,34 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x62e47a9583897C91300a42C81E1D46eA0686295d';
+const contractAddress = '0x4b420B9bF74B8e8094958623c8aBDfCBe06363e4';
 
 // 스마트 계약 인스턴스 생성
 const votingContract = new web3.eth.Contract(contractABI, contractAddress);
 
 // 투표 생성 함수
 async function createVote(question, imageURL, options, duration) {
-  const accounts = await web3.eth.getAccounts();
-  await votingContract.methods.createVote(question, imageURL, options, duration).send({ from: accounts[0] });
+  try {
+    const accounts = await web3.eth.getAccounts();
+    const feeData = await web3.eth.calculateFeeData();
+
+    // 가스 추정
+    const gasEstimate = await votingContract.methods.createVote(question, imageURL, options, duration).estimateGas({from: accounts[0]});
+
+    // 가스 한도를 추정치의 1.2배로 설정 (BigInt 사용)
+    const gasLimit = BigInt(Math.floor(Number(gasEstimate) * 1.2));
+
+    const tx = await votingContract.methods.createVote(question, imageURL, options, duration).send({
+      from: accounts[0],
+      gas: gasLimit,
+      maxFeePerGas: feeData.maxFeePerGas,
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas
+    });
+
+    console.log("Transaction successful:", tx.transactionHash);
+  } catch (error) {
+    console.error("Error creating vote:", error);
+  }
 }
 
 // 투표 참여 함수
@@ -407,7 +426,11 @@ const updateTimer = () => {
 onMounted(async () => {
   updateTimer()
   timer = setInterval(updateTimer, 1000)
-  await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
+  const vote = await getAllVotes();
+  if (!vote) {
+    await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
+  }
+  console.log(vote);
 })
 
 const activeVote = {
