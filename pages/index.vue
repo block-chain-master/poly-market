@@ -427,6 +427,7 @@ onMounted(async () => {
   updateTimer()
   timer = setInterval(updateTimer, 1000)
   const vote = await getAllVotes();
+  // 8.19
   if (!vote) {
     await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
   }
