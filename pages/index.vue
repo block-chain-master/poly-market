@@ -337,7 +337,9 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x4b420B9bF74B8e8094958623c8aBDfCBe06363e4';
+const contractAddress = '0x9350668EF4c648bd665a07d81EE5e8e0d0D32Ea2';
+const voteList = reactive({});
+const opList = ref([]);
 
 // 스마트 계약 인스턴스 생성
 const votingContract = new web3.eth.Contract(contractABI, contractAddress);
@@ -373,6 +375,16 @@ async function castVote(voteId, optionIndex) {
   await votingContract.methods.castVote(voteId, optionIndex).send({ from: accounts[0], value: web3.utils.toWei('0.1', 'ether') });
 }
 
+async function vote(voteId) {
+  try {
+    const result = await votingContract.methods.votes(voteId).call();
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.error('Error fetching votes:', error);
+  }
+}
+
 // 투표 결과 조회 함수
 async function getVoteResults(voteId) {
   const result = await votingContract.methods.getVoteResults(voteId).call();
@@ -384,6 +396,7 @@ async function getAllVotes() {
   try {
     const result = await votingContract.methods.getAllVotes().call();
     console.log(result);
+    return result;
   } catch (error) {
     console.error('Error fetching votes:', error);
   }
@@ -426,12 +439,14 @@ const updateTimer = () => {
 onMounted(async () => {
   updateTimer()
   timer = setInterval(updateTimer, 1000)
-  const vote = await getAllVotes();
+  let votes = await getAllVotes();
   // 8.19
-  if (!vote) {
-    await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
+  if (!votes) {
+    votes = await createVote('가장많이 오를것같은 코인은?,', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
   }
-  console.log(vote);
+  await vote(votes.voteIds[0]);
+
+  console.log(votes);
 })
 
 const activeVote = {
