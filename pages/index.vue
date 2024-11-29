@@ -248,6 +248,40 @@ const contractABI = [
         "type": "uint256"
       }
     ],
+    "name": "getVoteInfos",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "question",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "imageURL",
+        "type": "string"
+      },
+      {
+        "internalType": "string[]",
+        "name": "options",
+        "type": "string[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "votesPerOption",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "voteId",
+        "type": "uint256"
+      }
+    ],
     "name": "getVoteResults",
     "outputs": [
       {
@@ -269,11 +303,6 @@ const contractABI = [
         "internalType": "uint256[]",
         "name": "amounts",
         "type": "uint256[]"
-      },
-      {
-        "internalType": "string[]",
-        "name": "options",
-        "type": "string[]"
       }
     ],
     "stateMutability": "view",
@@ -342,7 +371,7 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x67e940B399FE431E21CA3Ecc1097DE97E9B8E846';
+const contractAddress = '0x0D52c5e3AAA0c201D8974852290C361DDA1EbC2E';
 const voteList = reactive({});
 const opList = ref([]);
 
@@ -376,7 +405,6 @@ async function createVote(question, imageURL, options, duration) {
 async function castVote(voteId, optionIndex) {
   try {
     const accounts = await web3.eth.getAccounts();
-
     const tx = await votingContract.methods.castVote(voteId, optionIndex).send({
       from: accounts[0],
       value: web3.utils.toWei('0.1', 'ether'),
@@ -384,7 +412,8 @@ async function castVote(voteId, optionIndex) {
     });
 
     if (tx.transactionHash) {
-      await getVoteResults(voteId);
+      const voteResult = await getVoteInfos(voteId);
+      console.log(voteResult)
     }
   } catch (error) {
     console.error('Error casting vote:', error);
@@ -399,6 +428,10 @@ async function vote(voteId) {
   } catch (error) {
     console.error('Error fetching votes:', error);
   }
+}
+
+async function getVoteInfos(voteId) {
+  return await votingContract.methods.getVoteInfos(voteId).call()
 }
 
 // 투표 결과 조회 함수
@@ -457,7 +490,7 @@ onMounted(async () => {
   if (!votes.voteIds.length) {
     votes = await createVote('가장많이 오를것같은 코인은?', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
   }
-  const voteResult = await getVoteResults(votes?.voteIds[0]);
+  const voteResult = await getVoteInfos(votes?.voteIds[0]);
   if (voteResult) {
     opList.value = voteResult.options;
   }
