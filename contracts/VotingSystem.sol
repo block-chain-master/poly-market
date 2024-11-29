@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
 contract VotingSystem {
 
@@ -75,12 +75,13 @@ contract VotingSystem {
     }
 
     // 투표 결과 가져오기
-    function getVoteResults(uint voteId) public view returns (uint winningOption, uint totalBetAmount, address[] memory winners, uint[] memory amounts) {
+    function getVoteResults(uint voteId) public view returns (uint winningOption, uint totalBetAmount, address[] memory winners, uint[] memory amounts,string[] memory options) {
         require(votes[voteId].creator != address(0), "Vote does not exist");
 
         uint totalPool = votes[voteId].totalBetAmount; // 전체 배팅 금액
         uint creatorReward = totalPool / 1000; // 0.1% 수수료
         uint remainingPool = totalPool - creatorReward; // 승자들에게 분배할 금액
+        options=votes[voteId].options;
 
         // 가장 많은 투표를 받은 옵션을 찾기
         uint winningVotes = 0;
@@ -105,7 +106,7 @@ contract VotingSystem {
             amounts[i] = (getTotalBetForUser(voteId, winners[i], winningOption) * remainingPool) / totalWinnersBet;
         }
 
-        return (winningOption, totalPool, winners, amounts);
+        return (winningOption, totalPool, winners, amounts,options);
     }
 
     // 승자 목록 반환
@@ -150,9 +151,10 @@ contract VotingSystem {
     }
 
     // 모든 투표 리스트 반환
-    function getAllVotes() public view returns (uint[] memory voteIds, string[] memory questions) {
+   function getAllVotes() public view returns (uint[] memory voteIds, string[] memory questions) {
         voteIds = new uint[](voteCount);
         questions = new string[](voteCount);
+
         for (uint i = 0; i < voteCount; i++) {
             voteIds[i] = i;
             questions[i] = votes[i].question;
