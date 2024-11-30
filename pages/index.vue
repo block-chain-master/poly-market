@@ -73,7 +73,6 @@ const authStore = useAuthStore()
 const showCongratulations = ref(false);
 const winnerAddress = ref('');
 
-
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 const contractABI = [
   {
@@ -388,8 +387,8 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x45f76965244c543cAD596dbA51e61f7cB5a114B8';
-const voteList = reactive({});
+const contractAddress = '0x833F388E3D53d8366A74BAECDE8bE57Df795D95B';
+
 const opListVal = reactive({});
 
 const isLogin = authStore.isLoggedIn;

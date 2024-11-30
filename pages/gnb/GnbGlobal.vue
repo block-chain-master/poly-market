@@ -19,7 +19,7 @@
               <NuxtLink v-if="isLogin" to="#" class="nav-link" @click.prevent="logout">로그아웃</NuxtLink>
             </template>
           </li>
-          <li>
+          <li v-if="isLogin">
             <NuxtLink to="/wallet/wallet" class="nav-link">지갑</NuxtLink>
           </li>
         </ul>
