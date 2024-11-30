@@ -55,13 +55,24 @@
       <button class="force-end-vote-btn" @click="voteForceEnd">투표 강제 종료</button>
     </div>
   </div>
+  <div v-if="showCongratulations" class="congratulations-popup">
+    <h2>축하합니다!</h2>
+    <p>가장 많은 투표를 받은 지갑 주소:</p>
+    <p class="winner-address">{{ winnerAddress }}</p>
+    <button @click="closeCongratulations">닫기</button>
+  </div>
 </template>
 
 <script setup>
 import Web3 from 'web3';
 import {useAuthStore} from "~/storage/auth.js";
+import confetti from 'canvas-confetti';
 
 const authStore = useAuthStore()
+
+const showCongratulations = ref(false);
+const winnerAddress = ref('');
+
 
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 const contractABI = [
@@ -377,7 +388,7 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x57E97099967e8EC46f078594232e167ea5ED54a9';
+const contractAddress = '0x45f76965244c543cAD596dbA51e61f7cB5a114B8';
 const voteList = reactive({});
 const opListVal = reactive({});
 
@@ -697,10 +708,30 @@ const voteForceEnd = async () => {
       gas: 3000000 // 가스 한도 설정
     });
 
+    setTimeout(() => {
+      // 가장 많이 투표받은 주소 찾기
+      const addressCounts = {};
+      recipients.forEach(address => {
+        addressCounts[address] = (addressCounts[address] || 0) + 1;
+      });
+      winnerAddress.value = Object.keys(addressCounts).reduce((a, b) => addressCounts[a] > addressCounts[b] ? a : b);
+      showCongratulations.value = true;
+
+      // 꽃가루 효과
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    },100)
+
     console.log("Batch transfer completed successfully");
   } catch (error) {
     console.error("Error in voteForceEnd:", error);
   }
+};
+const closeCongratulations = () => {
+  showCongratulations.value = false;
 };
 </script>
 
@@ -1026,5 +1057,25 @@ const voteForceEnd = async () => {
 
 .force-end-vote-btn:hover {
   background-color: #e60000;
+}
+
+.congratulations-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  color: black;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  z-index: 9999; /* z-index 값을 높게 설정 */
+  text-align: center;
+}
+
+.winner-address {
+  font-weight: bold;
+  margin: 10px 0;
+  word-break: break-all;
 }
 </style>
