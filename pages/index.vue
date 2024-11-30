@@ -51,6 +51,9 @@
       </div>
     </div>
 
+    <div class="fixed-bottom">
+      <button class="force-end-vote-btn">투표 강제 종료</button>
+    </div>
   </div>
 </template>
 
@@ -679,6 +682,7 @@ const items = [
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  padding-bottom: 60px;
 }
 
 .grid {
@@ -969,5 +973,31 @@ const items = [
   .grid {
     grid-template-columns: 1fr;
   }
+}
+
+.force-end-vote-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff4136;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.force-end-vote-btn:hover {
+  background-color: #e60000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.force-end-vote-btn:hover {
+  background-color: #e60000;
 }
 </style>
