@@ -9,13 +9,13 @@
           <h3 class="voting-card-title">{{ activeVote.title }}</h3>
         </div>
         <div class="voting-card-body">
-          <div v-for="(option, optionIndex) in opList" :key="optionIndex" class="voting-option">
-            <span class="voting-option-name">{{ option }}</span>
+          <div v-for="(option, optionIndex) in opListVal.value" :key="optionIndex" class="voting-option">
+            <span class="voting-option-name">{{ option.option }}</span>
             <div class="voting-progress-bar">
-              <div class="voting-progress" :style="{ width: option.percentage + '%' }"></div>
+              <div class="voting-progress" :style="{ width: (option.percent ? option.percent : 0) + '%' }"></div>
             </div>
-            <span class="voting-option-percentage">{{ option.percentage ? option.percentage : 0 }}%</span>
-            <button class="btn btn-vote" @click="castVote(0n, optionIndex)">투표하기</button>
+            <span class="voting-option-percentage">{{ option.percent ? option.percent : 0 }}%</span>
+            <button class="btn btn-vote" @click="castVote(0n, option.id)">투표하기</button>
           </div>
         </div>
         <div class="voting-card-footer">
@@ -371,9 +371,9 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0x0D52c5e3AAA0c201D8974852290C361DDA1EbC2E';
+const contractAddress = '0xaa74b58577A724eD2671D5f9e7D3f5cD4c28d0dF';
 const voteList = reactive({});
-const opList = ref([]);
+const opListVal = reactive({});
 
 // 스마트 계약 인스턴스 생성
 const votingContract = new web3.eth.Contract(contractABI, contractAddress);
@@ -413,7 +413,12 @@ async function castVote(voteId, optionIndex) {
 
     if (tx.transactionHash) {
       const voteResult = await getVoteInfos(voteId);
-      console.log(voteResult)
+      if (voteResult) {
+        const {options, votesPerOption} = voteResult;
+        const opList = createOpList(options, votesPerOption);
+        opListVal.value = {};
+        opListVal.value = opList;
+      }
     }
   } catch (error) {
     console.error('Error casting vote:', error);
@@ -423,7 +428,6 @@ async function castVote(voteId, optionIndex) {
 async function vote(voteId) {
   try {
     const result = await votingContract.methods.votes(voteId).call();
-    console.log(result);
     return result;
   } catch (error) {
     console.error('Error fetching votes:', error);
@@ -457,7 +461,7 @@ votingContract.events.VoteEnded({}, (error, event) => {
   console.log('Vote ended:', event.returnValues);
 });
 
-const targetDate = new Date('2024-11-30 12:00:00').getTime();
+const targetDate = new Date('2024-11-30 19:00:00').getTime();
 const timeLeft = ref('')
 const formattedTimeLeft = ref('')
 let timer
@@ -492,10 +496,33 @@ onMounted(async () => {
   }
   const voteResult = await getVoteInfos(votes?.voteIds[0]);
   if (voteResult) {
-    opList.value = voteResult.options;
+    const {options, votesPerOption} = voteResult;
+
+    const opList = createOpList(options, votesPerOption);
+    opListVal.value = opList;
   }
-  console.log(voteResult, opList.value)
 })
+
+const createOpList = (options, votesPerOption) => {
+  const totalVotes = votesPerOption.reduce((sum, votes) => sum + BigInt(votes), BigInt(0));
+
+  const list = options.map((option, index) => {
+    const count = Number(votesPerOption[index]);
+    const percent = totalVotes > 0
+        ? Number((BigInt(votesPerOption[index]) * BigInt(100)) / totalVotes)
+        : 0;
+
+    return {
+      option,
+      count,
+      percent,
+      id: index
+    };
+  });
+
+  // percent 기준으로 내림차순 정렬
+  return list.sort((a, b) => b.percent - a.percent);
+};
 
 const activeVote = {
   icon: 'https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp',
