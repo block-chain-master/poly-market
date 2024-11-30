@@ -15,7 +15,7 @@
               <div class="voting-progress" :style="{ width: (option.percent ? option.percent : 0) + '%' }"></div>
             </div>
             <span class="voting-option-percentage">{{ option.percent ? option.percent : 0 }}%</span>
-            <button class="btn btn-vote" @click="castVote(0n, option.id)">투표하기</button>
+            <button class="btn btn-vote" @click="castVote(0n, option.id, optionIndex)">투표하기</button>
           </div>
         </div>
         <div class="voting-card-footer">
@@ -402,11 +402,11 @@ async function createVote(question, imageURL, options, duration) {
 }
 
 // 투표 참여 함수
-async function castVote(voteId, optionIndex) {
+async function castVote(voteId, optionIndex, accountIdx) {
   try {
     const accounts = await web3.eth.getAccounts();
     const tx = await votingContract.methods.castVote(voteId, optionIndex).send({
-      from: accounts[0],
+      from: accounts[accountIdx > 8 ? 0 : accountIdx],
       value: web3.utils.toWei('0.1', 'ether'),
       gas: 300000
     });
