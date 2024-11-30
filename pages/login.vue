@@ -34,6 +34,10 @@
 <script setup>
 import {ref} from 'vue';
 import { useRouter } from 'vue-router';
+import {useAuthStore} from "~/storage/auth.js";
+
+const authStore = useAuthStore()
+
 
 const router = useRouter();
 
@@ -55,7 +59,7 @@ const signIn = () => {
   console.log('로그인:', email.value, password.value);
 
   // 로그인 성공 가정
-  localStorage.setItem('logIn', 'Y');
+  authStore.login();
 
   // index 페이지로 이동
   router.push('/');

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div v-if="isLogin" class="container">
     <h1>폴리마켓 지갑</h1>
     <div class="wallet-info">
       <template v-if="!isConnected">
@@ -22,7 +22,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { ethers } from 'ethers';
+import {useAuthStore} from "~/storage/auth.js";
 
+const authStore = useAuthStore()
+
+const isLogin = authStore.isLoggedIn;
 const ethPrice = ref(0.00);
 
 const isConnected = ref(false);

@@ -12,13 +12,15 @@
             <NuxtLink to="/" class="nav-link">홈</NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/login" class="nav-link">로그인</NuxtLink>
+            <template v-if="!isLogin">
+              <NuxtLink to="/login" class="nav-link">로그인</NuxtLink>
+            </template>
+            <template v-else>
+              <NuxtLink v-if="isLogin" to="#" class="nav-link" @click.prevent="logout">로그아웃</NuxtLink>
+            </template>
           </li>
           <li>
             <NuxtLink to="/wallet/wallet" class="nav-link">지갑</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink v-if="isLogin" to="/" class="nav-link" @click.prevent="localStorage.setItem('logIn', 'N');">로그아웃</NuxtLink>
           </li>
         </ul>
       </nav>
@@ -27,8 +29,17 @@
 </template>
 
 <script setup>
-// 필요한 경우 여기에 스크립트를 추가하세요
-const isLogin = computed(() => localStorage.getItem('logIn') === 'Y');
+
+import {useAuthStore} from "~/storage/auth.js";
+
+const authStore = useAuthStore()
+
+const isLogin = authStore.isLoggedIn;
+
+const logout = () => {
+  authStore.logout()
+  window.location.reload()
+}
 </script>
 
 <style scoped>

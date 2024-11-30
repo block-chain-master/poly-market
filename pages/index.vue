@@ -56,6 +56,9 @@
 
 <script setup>
 import Web3 from 'web3';
+import {useAuthStore} from "~/storage/auth.js";
+
+const authStore = useAuthStore()
 
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 const contractABI = [
@@ -375,7 +378,7 @@ const contractAddress = '0xaa74b58577A724eD2671D5f9e7D3f5cD4c28d0dF';
 const voteList = reactive({});
 const opListVal = reactive({});
 
-const isLogin = computed(() => localStorage.getItem('logIn') === 'Y');
+const isLogin = authStore.isLoggedIn;
 
 // 스마트 계약 인스턴스 생성
 const votingContract = new web3.eth.Contract(contractABI, contractAddress);
