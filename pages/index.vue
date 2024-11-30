@@ -14,7 +14,7 @@
             <div class="voting-progress-bar">
               <div class="voting-progress" :style="{ width: option.percentage + '%' }"></div>
             </div>
-            <span class="voting-option-percentage">{{ option.percentage }}%</span>
+            <span class="voting-option-percentage">{{ option.percentage ? option.percentage : 0 }}%</span>
             <button class="btn btn-vote" @click="castVote(0n, optionIndex)">투표하기</button>
           </div>
         </div>
