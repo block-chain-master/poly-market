@@ -17,6 +17,9 @@
           <li>
             <NuxtLink to="/wallet/wallet" class="nav-link">지갑</NuxtLink>
           </li>
+          <li>
+            <NuxtLink v-if="isLogin" to="/" class="nav-link" @click.prevent="localStorage.setItem('logIn', 'N');">로그아웃</NuxtLink>
+          </li>
         </ul>
       </nav>
     </div>
@@ -25,6 +28,7 @@
 
 <script setup>
 // 필요한 경우 여기에 스크립트를 추가하세요
+const isLogin = computed(() => localStorage.getItem('logIn') === 'Y');
 </script>
 
 <style scoped>
