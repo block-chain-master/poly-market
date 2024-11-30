@@ -52,7 +52,7 @@
     </div>
 
     <div class="fixed-bottom">
-      <button class="force-end-vote-btn">투표 강제 종료</button>
+      <button class="force-end-vote-btn" @click="voteForceEnd">투표 강제 종료</button>
     </div>
   </div>
 </template>
@@ -674,7 +674,9 @@ const items = [
   },
 ];
 
+const voteForceEnd = () => {
 
+}
 </script>
 
 <style scoped>

@@ -37,7 +37,7 @@ const network = ref('');
 const getEthPrice = async () => {
   try {
     // Ganache의 기본 URL. 필요에 따라 변경하세요.
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 
     // 체인 ID를 확인하여 로컬 환경인지 판단
     const network = await provider.getNetwork();
