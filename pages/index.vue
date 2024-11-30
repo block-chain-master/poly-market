@@ -377,7 +377,7 @@ const contractABI = [
     "type": "function"
   }
 ];
-const contractAddress = '0xaa74b58577A724eD2671D5f9e7D3f5cD4c28d0dF';
+const contractAddress = '0x57E97099967e8EC46f078594232e167ea5ED54a9';
 const voteList = reactive({});
 const opListVal = reactive({});
 
@@ -499,8 +499,10 @@ onMounted(async () => {
   timer = setInterval(updateTimer, 1000)
   let votes = await getAllVotes();
   // 8.19
+  console.log(votes)
   if (!votes.voteIds.length) {
     votes = await createVote('가장많이 오를것같은 코인은?', `https://i.namu.wiki/i/u6i7DVoL_l46S9Hyhltbhn3zdi9gzSJUWFyY6mRHH89RmIYRUPEVSydgDFYmg_WalAqY-y03TcG3Pb3s-o1xSw.webp`, ["도지코인", "비트코인", "이더리움", "솔라나", "폴리곤", "리플", "시바이누", "아크"], 259200);
+    console.log(votes)
   }
   const voteResult = await getVoteInfos(votes?.voteIds[0]);
   if (voteResult) {
@@ -674,9 +676,32 @@ const items = [
   },
 ];
 
-const voteForceEnd = () => {
+const voteForceEnd = async () => {
+  try {
+    const result = await getVoteResults(0);
+    console.log("Vote results:", result);
 
-}
+    const recipients = result[2]; // winners 배열
+    const amounts = result[3]; // amounts 배열
+
+    // Wei를 Ether로 변환
+    const amountsInEther = amounts.map(amount => web3.utils.fromWei(amount, 'ether'));
+
+    console.log("Recipients:", recipients);
+    console.log("Amounts (in Ether):", amountsInEther);
+
+    // 컨트랙트의 batchTransfer 함수 호출
+    const accounts = await web3.eth.getAccounts();
+    await votingContract.methods.batchTransfer(recipients, amounts).send({
+      from: accounts[0],
+      gas: 3000000 // 가스 한도 설정
+    });
+
+    console.log("Batch transfer completed successfully");
+  } catch (error) {
+    console.error("Error in voteForceEnd:", error);
+  }
+};
 </script>
 
 <style scoped>
